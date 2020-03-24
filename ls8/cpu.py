@@ -7,18 +7,16 @@ class CPU:
 
     def __init__(self):
         """Construct a new CPU."""
-        self.ram = {} 
+        self.ram = [0] * 256
         self.pc = 0
-        self.reg = []
+        self.reg = [0] * 8
         
 
     def load(self):
         """Load a program into memory."""
-
         address = 0
 
         # For now, we've just hardcoded a program:
-
         program = [
             # From print8.ls8
             0b10000010, # LDI R0,8
@@ -33,10 +31,8 @@ class CPU:
             self.ram[address] = instruction
             address += 1
 
-
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
-
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
         #elif op == "SUB": etc
@@ -63,12 +59,55 @@ class CPU:
 
         print()
 
-    def ram_read(self, count):
-        return self.ram[count]
+    def ram_read(self, address):
+        return self.ram[address]
 
-    def ram_write(self, count, md):
-        self.ram[count] = md
+    def ram_write(self, address, new):
+        self.ram[address] = new
 
     def run(self):
         """Run the CPU."""
-        pass
+        # self.pc = 0
+        # running = True
+
+        # HALT = 1
+        # PRINT = 47
+        # while running:
+        #     command = self.ram[self.pc]
+        #     if command == HALT:
+        #         running = False
+        #         self.pc += 1
+        #     elif command == PRINT:
+        #         self.pc += 2
+        #     else:
+        #         print(f'Do not know what {command} is')
+        #         sys.exit(1)
+        #     self.pc += 1
+        running = True
+
+        LDI = 130
+        PRINT_NUM = 71
+        HALT = 1
+
+        while running:
+            instructions = self.ram[self.pc]
+            print(instructions)
+            print(type(instructions))
+            if instructions == LDI:
+                reg = self.ram_read(self.pc + 1)
+                self.ram_write(self.pc, reg)
+                self.pc += 3
+
+            elif instructions == PRINT_NUM:
+                reg = self.ram_read(self.pc + 1)
+                print(self.ram_read(reg))
+                self.pc += 2
+
+            elif instructions == HALT:
+                running = False
+                sys.exit(0)
+
+            else:
+                print(f'Do not know what {instructions} is')
+                sys.exit(1)
+
