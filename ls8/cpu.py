@@ -30,7 +30,7 @@ class CPU:
                     # val = eval(f"0b{num}")
                     val = int(num, 2) #base 2
                     self.ram_write(address, val)
-                    print(f"RAM has been written to ---> val: {val}, address: {address}")
+                    print(f"RAM --> val: {val}, address: {address}")
                     address +=1
         except FileNotFoundError:
             print(f" {sys.argv[0]}: {filename} not found")
