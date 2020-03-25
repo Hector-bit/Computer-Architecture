@@ -8,28 +8,30 @@ class CPU:
     def __init__(self):
         """Construct a new CPU."""
         self.ram = [0] * 256
-        self.pc = 0
         self.reg = [0] * 8
+        self.pc = 0
         
 
-    def load(self):
+    def load(self, filename):
         """Load a program into memory."""
         address = 0
 
-        # For now, we've just hardcoded a program:
-        program = [
-            # From print8.ls8
-            0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
-        ]
-
-        for instruction in program:
-            self.ram[address] = instruction
-            address += 1
+        try:
+            with open(filename) as f:
+                for line in f:
+                    #ignores comments
+                    comment_split = line.split("#")
+                    #cuts out whitespace
+                    num = comment_split[0].strip()
+                    #ignore blank lines
+                    if num == '':
+                        continue
+                    val = int(num)
+                    self.ram[address] = val
+                    address += 1
+        except FileNotFoundError:
+            print('file not found')
+            sys.exit(2)
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
@@ -67,22 +69,6 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        # self.pc = 0
-        # running = True
-
-        # HALT = 1
-        # PRINT = 47
-        # while running:
-        #     command = self.ram[self.pc]
-        #     if command == HALT:
-        #         running = False
-        #         self.pc += 1
-        #     elif command == PRINT:
-        #         self.pc += 2
-        #     else:
-        #         print(f'Do not know what {command} is')
-        #         sys.exit(1)
-        #     self.pc += 1
         running = True
 
         LDI = 130
