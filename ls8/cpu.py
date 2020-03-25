@@ -19,25 +19,31 @@ class CPU:
         try:
             with open(filename) as f:
                 for line in f:
-                    #ignores comments
+                    #ignore comments
                     comment_split = line.split("#")
-                    #cuts out whitespace
+                    #Strip whitespace
                     num = comment_split[0].strip()
-                    #ignore blank lines
-                    if num == '':
-                        continue
-                    val = int(num)
-                    self.ram[address] = val
-                    address += 1
+                    #Ignore blank lines
+                    if num =='':
+                        continue 
+                        
+                    # val = eval(f"0b{num}")
+                    val = int(num, 2) #base 2
+                    self.ram_write(address, val)
+                    print(f"RAM has been written to ---> val: {val}, address: {address}")
+                    address +=1
         except FileNotFoundError:
-            print('file not found')
+            print(f" {sys.argv[0]}: {filename} not found")
             sys.exit(2)
+
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
         #elif op == "SUB": etc
+        elif op == "MUL":
+            self.reg[reg_a] *= self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -64,8 +70,8 @@ class CPU:
     def ram_read(self, address):
         return self.ram[address]
 
-    def ram_write(self, address, new):
-        self.ram[address] = new
+    def ram_write(self, MAR, MDR):
+        self.ram[MAR] = MDR
 
     def run(self):
         """Run the CPU."""
@@ -74,14 +80,21 @@ class CPU:
         LDI = 130
         PRINT_NUM = 71
         HALT = 1
+        MUL = 0b10100010
 
         while running:
             instructions = self.ram[self.pc]
-            print(instructions)
-            print(type(instructions))
-            if instructions == LDI:
+            # print(instructions)
+            # print(type(instructions))
+            if instructions == HALT:
+                running = False
+                sys.exit(0)
+                self.pc += 1
+
+            elif instructions == LDI:
                 reg = self.ram_read(self.pc + 1)
-                self.ram_write(self.pc, reg)
+                num = self.ram_read(self.pc + 2)
+                self.reg[reg] = num
                 self.pc += 3
 
             elif instructions == PRINT_NUM:
@@ -89,11 +102,12 @@ class CPU:
                 print(self.ram_read(reg))
                 self.pc += 2
 
-            elif instructions == HALT:
-                running = False
-                sys.exit(0)
+            elif instructions == MUL:
+                reg_a = self.ram_read(self.pc + 1)
+                reg_b = self.ram_read(self.pc + 2)
+                self.alu("MUL", reg_a, reg_b)
+                self.pc += 3
 
             else:
                 print(f'Do not know what {instructions} is')
                 sys.exit(1)
-
