@@ -81,11 +81,18 @@ class CPU:
         PRINT_NUM = 71
         HALT = 1
         MUL = 0b10100010
+        PUSH = 0b01000101
+        POP = 0b01000110
+
+        SP = 7
 
         while running:
             instructions = self.ram[self.pc]
             # print(instructions)
             # print(type(instructions))
+            print(self.ram)
+            # print
+            print('-------------')
             if instructions == HALT:
                 running = False
                 sys.exit(0)
@@ -107,6 +114,22 @@ class CPU:
                 reg_b = self.ram_read(self.pc + 2)
                 self.alu("MUL", reg_a, reg_b)
                 self.pc += 3
+
+            elif instructions == PUSH:
+                reg = self.ram[self.pc + 1]
+                val = self.reg[reg]
+                self.reg[SP] -= 1
+                #copy the value in the given register to the address pointed to by SP
+                self.ram[self.reg[SP]] =  val
+                self.pc += 2
+
+            elif instructions == POP:
+                reg = self.ram[self.pc + 1]
+                val = self.ram[self.reg[SP]]
+                #copy the value from the address pointed to be the SP
+                self.reg[reg] = val
+                self.reg[SP] += 1
+                self.pc += 2
 
             else:
                 print(f'Do not know what {instructions} is')
