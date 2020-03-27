@@ -10,9 +10,9 @@ class CPU:
         self.ram = [0] * 256
         self.reg = [0] * 8
         self.pc = 0
-        self.fl_L = None
-        self.fl_G = None
-        self.fl_E = None
+        self.fl_L = 0
+        self.fl_G = 0
+        self.fl_E = 0
         
 
     def load(self, filename):
@@ -33,7 +33,7 @@ class CPU:
                     # val = eval(f"0b{num}")
                     val = int(num, 2) #base 2
                     self.ram_write(address, val)
-                    print(f"RAM --> val: {val}, address: {address}")
+                    # print(f"RAM --> val: {val}, address: {address}")
                     address +=1
         except FileNotFoundError:
             print(f" {sys.argv[0]}: {filename} not found")
@@ -100,8 +100,8 @@ class CPU:
             instructions = self.ram[self.pc]
             # print(instructions)
             # print(type(instructions))
-            print(self.ram)
-            print(self.reg)
+            # print(self.ram)
+            # print(self.reg)
             # print
             print('-------------')
             if instructions == HALT:
@@ -113,12 +113,13 @@ class CPU:
                 reg = self.ram_read(self.pc + 1)
                 num = self.ram_read(self.pc + 2)
                 self.reg[reg] = num
-                print(num, f'<-- number at index {reg} was printed')
                 self.pc += 3
 
             elif instructions == PRINT_NUM:
                 reg = self.ram_read(self.pc + 1)
-                print(self.ram_read(reg))
+                # print(self.ram_read(reg))
+                num = self.reg[reg]
+                print(num, 'NUM HERE')
                 self.pc += 2
 
             elif instructions == MUL:
@@ -158,35 +159,39 @@ class CPU:
             # - - - Sprint Challenge operations - - - - - - - - - -
 
             elif instructions == CMP:
-                reg_a = self.ram_read(self.pc + 1)
-                reg_b = self.ram_read(self.pc + 2)
-                A = self.reg[0]
-                B = self.reg[1]
+                setA = self.ram_read(self.pc + 1)
+                setB = self.ram_read(self.pc + 2)
+                A = self.reg[setA]
+                B = self.reg[setB]
                 if A == B:
-                    print('register A and B were equal')
+                    # print('register A and B were equal')
                     self.fl_E = 1
                 elif A > B:
-                    print('register A is greater than B')
+                    # print('register A is greater than B')
                     self.fl_G = 1
                 elif A < B: 
-                    print('register A is less than B')
+                    # print('register A is less than B')
                     self.fl_L = 1
                 self.pc += 3
 
             elif instructions == JEQ:
+                reg = self.ram_read(self.pc + 1)
                 if self.fl_E == 1:
-                    self.pc = self.reg[2]
+                    self.pc = self.reg[reg]
                 else:
                     self.pc += 2
 
             elif instructions == JNE:
+                reg = self.ram_read(self.pc + 1)
                 if self.fl_E == 0:
-                    self.pc = self.reg[2]
+                    self.pc = self.reg[reg]
                 else:
                     self.pc += 2
 
             elif instructions == JMP:
-                self.pc = self.reg[2]
+                reg = self.ram_read(self.pc + 1)
+                # print(reg, '<-- JUMPED TO HERE')
+                self.pc = self.reg[reg]
 
             else:
                 print(f'Do not know what {instructions} is')
