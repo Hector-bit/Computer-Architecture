@@ -83,6 +83,8 @@ class CPU:
         MUL = 0b10100010
         PUSH = 0b01000101
         POP = 0b01000110
+        CALL = 0b01010000
+        RET = 0b00010001
 
         SP = 7
 
@@ -91,6 +93,7 @@ class CPU:
             # print(instructions)
             # print(type(instructions))
             print(self.ram)
+            print(self.reg)
             # print
             print('-------------')
             if instructions == HALT:
@@ -102,6 +105,7 @@ class CPU:
                 reg = self.ram_read(self.pc + 1)
                 num = self.ram_read(self.pc + 2)
                 self.reg[reg] = num
+                print(num, f'<-- number at index {reg} was printed')
                 self.pc += 3
 
             elif instructions == PRINT_NUM:
@@ -130,6 +134,18 @@ class CPU:
                 self.reg[reg] = val
                 self.reg[SP] += 1
                 self.pc += 2
+
+            elif instructions == CALL:
+                self.reg[SP] -= 1
+                self.ram[self.reg[SP]] = self.pc + 2
+                reg = self.ram[self.pc + 1]
+                self.pc = self.reg[reg]
+
+            elif instructions == RET:
+                #return from subroutine
+                #POP the value from the top of the stack and store it in the PC
+                self.pc = self.ram[self.ram[SP]]
+                self.reg[SP] += 1
 
             else:
                 print(f'Do not know what {instructions} is')
