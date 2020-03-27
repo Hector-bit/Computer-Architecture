@@ -10,6 +10,9 @@ class CPU:
         self.ram = [0] * 256
         self.reg = [0] * 8
         self.pc = 0
+        self.fl_L = None
+        self.fl_G = None
+        self.fl_E = None
         
 
     def load(self, filename):
@@ -77,9 +80,9 @@ class CPU:
         """Run the CPU."""
         running = True
 
-        LDI = 130
-        PRINT_NUM = 71
-        HALT = 1
+        LDI = 0b10000010
+        PRINT_NUM = 0b01000111
+        HALT = 0b00000001
         MUL = 0b10100010
         PUSH = 0b01000101
         POP = 0b01000110
@@ -87,6 +90,11 @@ class CPU:
         RET = 0b00010001
 
         SP = 7
+
+        CMP = 0B10100111
+        JMP = 0b01010100
+        JNE = 0b01010110
+        JEQ = 0b01010101
 
         while running:
             instructions = self.ram[self.pc]
@@ -146,6 +154,39 @@ class CPU:
                 #POP the value from the top of the stack and store it in the PC
                 self.pc = self.ram[self.ram[SP]]
                 self.reg[SP] += 1
+
+            # - - - Sprint Challenge operations - - - - - - - - - -
+
+            elif instructions == CMP:
+                reg_a = self.ram_read(self.pc + 1)
+                reg_b = self.ram_read(self.pc + 2)
+                A = self.reg[0]
+                B = self.reg[1]
+                if A == B:
+                    print('register A and B were equal')
+                    self.fl_E = 1
+                elif A > B:
+                    print('register A is greater than B')
+                    self.fl_G = 1
+                elif A < B: 
+                    print('register A is less than B')
+                    self.fl_L = 1
+                self.pc += 3
+
+            elif instructions == JEQ:
+                if self.fl_E == 1:
+                    self.pc = self.reg[2]
+                else:
+                    self.pc += 2
+
+            elif instructions == JNE:
+                if self.fl_E == 0:
+                    self.pc = self.reg[2]
+                else:
+                    self.pc += 2
+
+            elif instructions == JMP:
+                self.pc = self.reg[2]
 
             else:
                 print(f'Do not know what {instructions} is')
